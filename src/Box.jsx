@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { PostContext } from "./PostContext";
 
-function BookShow({ title, name, read, onDeleteItem }) {
+function BookShow({ title, name, read, onDeleteItem}) {
   const [color, setColor] = useState("red");
 
   return (
@@ -40,7 +40,7 @@ function BookShow({ title, name, read, onDeleteItem }) {
       </div>
       <img
         className="w-full h-48 object-cover py-4 px-4"
-        src={image}
+        src=''
         alt={name}
       />
       <p className="mr-auto text-center text-gray-800 font-semibold">{name}</p>
@@ -50,8 +50,10 @@ function BookShow({ title, name, read, onDeleteItem }) {
 
 function Box() {
   const { reading, setReading } = useContext(PostContext);
+  console.log(reading);
 
-  const handleDeleteItem = async (id) => { // Accept id as parameter
+  const handleDeleteItem = async (id) => {
+    // Accept id as parameter
     if (!id) {
       console.error("Cannot delete item: ID is undefined");
       return; // Exit if ID is undefined
@@ -59,33 +61,34 @@ function Box() {
 
     try {
       const response = await fetch(`http://localhost:4000/api/books/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.ok) {
         setReading((prevBooks) => prevBooks.filter((book) => book._id !== id));
         console.log(`Book with id ${id} has been deleted`);
       } else {
-        console.error('Failed to delete the book');
+        console.error("Failed to delete the book");
       }
     } catch (error) {
-      console.error('Error deleting the book:', error);
+      console.error("Error deleting the book:", error);
     }
   };
 
   return (
     <div>
       <ul className="flex flex-wrap w-100 gap-5 justify-center">
-        {reading && reading.map((read) => (
-          <BookShow
-            key={read._id} // Use the correct id as the key
-            title={read.title} // Adjust this to the actual image property if available
-            name={read.author}
-            read={read}
-            onDeleteItem={handleDeleteItem} // Pass the delete function to BookShow component
-
-          />
-        ))}
+        {reading &&
+          reading.map((read) => (
+            <BookShow
+              key={read._id} // Use the correct id as the key
+              title={read.title} // Adjust this to the actual image property if available
+              name={read.author}
+              read={read}
+              // image={read.image}
+              onDeleteItem={handleDeleteItem} // Pass the delete function to BookShow component
+            />
+          ))}
       </ul>
     </div>
   );

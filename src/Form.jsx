@@ -11,31 +11,30 @@ function Form() {
   const [author, setAuthor] = useState('');
   const [year, setYear] = useState('');
   const [error, setError] = useState(null);
-  const [image, setImage] = useState(null);
+  // const [image, setImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const navigate = useNavigate(); // Initialize the useNavigate hook
 
-  function HandleFile(event) {
-    const selectedFile = event.target.files[0];
-    setImage(selectedFile);
+  // function HandleFile(event) {
+  //   const selectedFile = event.target.files[0];
+  //   setImage(selectedFile);
 
-    const preview = URL.createObjectURL(selectedFile);
-    setPreviewUrl(preview);
-  }
+  //   const preview = URL.createObjectURL(selectedFile);
+  //   setPreviewUrl(preview);
+  // }
   const handleSubmit = async (e) => {
     e.preventDefault();
   
     // Create a FormData object to handle file uploads
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('author', author);
-    formData.append('year', year);
-    formData.append('image', image);
+    const book = {title, author, year}
   
     try {
       const response = await fetch('http://localhost:4000/api/books', {
         method: 'POST',
-        body: formData, // Send the formData object
+        body: JSON.stringify(book),
+        headers: {
+          'content-Type': "application/json"
+        } // Send the formData object
       });
   
       const json = await response.json();
@@ -47,7 +46,7 @@ function Form() {
         setAuthor('');
         setYear('');
         setError(null);
-        setImage(null);
+        // setImage(null);
         setPreviewUrl(null);
         console.log('New book added', json);
         navigate('/'); // Redirect to the homepage on successful book addition
@@ -109,7 +108,7 @@ function Form() {
           onChange={(e) => setYear(e.target.value)}
         />
 
-<label className="block mt-4 text-sm font-medium text-gray-700">
+{/* <label className="block mt-4 text-sm font-medium text-gray-700">
           Cover Photo
         </label>
         {previewUrl && (
@@ -123,7 +122,7 @@ function Form() {
           type="file"
           onChange={HandleFile}
           className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-        />
+        /> */}
 
         <button
           type="submit"
