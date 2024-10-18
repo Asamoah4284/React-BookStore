@@ -1,59 +1,73 @@
+
+
+
 import { useContext, useState } from "react";
 import { PostContext } from "./PostContext";
 import { useNavigate } from "react-router-dom";
 
 function Form() {
-  const { setBooks } = useContext(PostContext);
-  const [file, setFile] = useState(null);
+  const { setReading } = useContext(PostContext); // Access setReading from context
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [year, setYear] = useState('');
+  const [error, setError] = useState(null);
+  const [image, setImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [value, setValue] = useState("");
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Initialize the useNavigate hook
 
   function HandleFile(event) {
     const selectedFile = event.target.files[0];
-    setFile(selectedFile);
+    setImage(selectedFile);
 
     const preview = URL.createObjectURL(selectedFile);
     setPreviewUrl(preview);
   }
-
-  function handleChange(e) {
-    setValue(e.target.value);
-  }
-
-  function HandleAddBook(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (value.trim() === "" || !file) return;
-
-    const newBook = {
-      id: Date.now(),
-      name: value,
-      img: previewUrl,
-    };
-
-    setBooks((books) => [newBook, ...books]);
-
-    setValue("");
-    setFile(null);
-    setPreviewUrl(null);
-
-    navigate("/");
-  }
-
+  
+    // Create a FormData object to handle file uploads
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('author', author);
+    formData.append('year', year);
+    formData.append('image', image);
+  
+    try {
+      const response = await fetch('http://localhost:4000/api/books', {
+        method: 'POST',
+        body: formData, // Send the formData object
+      });
+  
+      const json = await response.json();
+      if (!response.ok) {
+        setError(json.error);
+      } else {
+        setReading((prevBooks) => [...prevBooks, json]); // Add the new book to the list
+        setTitle('');
+        setAuthor('');
+        setYear('');
+        setError(null);
+        setImage(null);
+        setPreviewUrl(null);
+        console.log('New book added', json);
+        navigate('/'); // Redirect to the homepage on successful book addition
+      }
+    } catch (error) {
+      console.error('Error adding book:', error);
+    }
+  };
+  
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-5">
       <form
-        onSubmit={HandleAddBook}
+        onSubmit={handleSubmit}
         className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md"
       >
         <h1 className="text-2xl font-bold mb-6 text-gray-700 text-center">
           Add a New Book
         </h1>
 
-        <label
-          htmlFor="bookTitle"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="bookTitle" className="block text-sm font-medium text-gray-700">
           Name of Book
         </label>
         <input
@@ -63,11 +77,39 @@ function Form() {
           className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           placeholder="Enter Book Title"
           required
-          value={value}
-          onChange={handleChange}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
 
-        <label className="block mt-4 text-sm font-medium text-gray-700">
+        <label htmlFor="bookAuthor" className="block text-sm font-medium text-gray-700">
+          Author of Book
+        </label>
+        <input
+          type="text"
+          name="bookAuthor"
+          id="bookAuthor"
+          className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          placeholder="Enter Book Author"
+          required
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+        />
+
+        <label htmlFor="bookYear" className="block text-sm font-medium text-gray-700">
+          Year of Publication
+        </label>
+        <input
+          type="text"
+          name="bookYear"
+          id="bookYear"
+          className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          placeholder="Enter Year of Publication"
+          required
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+        />
+
+<label className="block mt-4 text-sm font-medium text-gray-700">
           Cover Photo
         </label>
         {previewUrl && (
@@ -89,6 +131,7 @@ function Form() {
         >
           Add Book
         </button>
+        {error && <div className="text-red-500 mt-4">{error}</div>}
       </form>
     </div>
   );

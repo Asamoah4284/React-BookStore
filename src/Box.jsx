@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { PostContext } from "./PostContext";
 
-function BookShow({ image, name, onDeleteItem, book }) {
+function BookShow({ title, name, read, onDeleteItem }) {
   const [color, setColor] = useState("red");
 
   return (
@@ -24,22 +24,22 @@ function BookShow({ image, name, onDeleteItem, book }) {
         </svg>
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          fill="nore"
+          fill="none"
           viewBox="0 0 24 24"
           strokeWidth={1.5}
           stroke="currentColor"
           className="size-6 ml-auto my-2 mx-2 cursor-pointer"
-          onClick={() => onDeleteItem(book.id)}
+          onClick={() => onDeleteItem(read._id)} // Call onDeleteItem with the book's ID
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="M6 18 18 6M6 6l12 12"
+            d="M6 18L18 6M6 6l12 12"
           />
         </svg>
       </div>
       <img
-        className="w-full h-48 object-cover py-4 px-4" // Full width, fixed height
+        className="w-full h-48 object-cover py-4 px-4"
         src={image}
         alt={name}
       />
@@ -49,22 +49,41 @@ function BookShow({ image, name, onDeleteItem, book }) {
 }
 
 function Box() {
-  const { books, setBooks } = useContext(PostContext);
+  const { reading, setReading } = useContext(PostContext);
 
-  function HandleDeleteItem(id) {
-    setBooks((books) => books.filter((book) => book.id !== id));
-  }
+  const handleDeleteItem = async (id) => { // Accept id as parameter
+    if (!id) {
+      console.error("Cannot delete item: ID is undefined");
+      return; // Exit if ID is undefined
+    }
+
+    try {
+      const response = await fetch(`http://localhost:4000/api/books/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setReading((prevBooks) => prevBooks.filter((book) => book._id !== id));
+        console.log(`Book with id ${id} has been deleted`);
+      } else {
+        console.error('Failed to delete the book');
+      }
+    } catch (error) {
+      console.error('Error deleting the book:', error);
+    }
+  };
 
   return (
     <div>
       <ul className="flex flex-wrap w-100 gap-5 justify-center">
-        {books.map((book) => (
+        {reading && reading.map((read) => (
           <BookShow
-            image={book.img}
-            name={book.name}
-            key={book.id}
-            onDeleteItem={HandleDeleteItem}
-            book={book}
+            key={read._id} // Use the correct id as the key
+            title={read.title} // Adjust this to the actual image property if available
+            name={read.author}
+            read={read}
+            onDeleteItem={handleDeleteItem} // Pass the delete function to BookShow component
+
           />
         ))}
       </ul>

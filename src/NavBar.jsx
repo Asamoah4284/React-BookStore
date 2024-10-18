@@ -21,7 +21,7 @@ function NavBar() {
             />
           </svg>
 
-          <Link to="/" className="text-gray-300 cursor-pointer">
+          <Link to="/home" className="text-gray-300 cursor-pointer">
             Home
           </Link>
           <Link to="/like" className="text-gray-300 cursor-pointer">

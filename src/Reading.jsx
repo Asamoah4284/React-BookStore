@@ -1,5 +1,5 @@
 function Reading({ books, setBooks }) {
-  console.log(books);
+  // console.log(books);
   return (
     <div className="mx-5 my-5">
       <div className="flex items-center space-x-2">
